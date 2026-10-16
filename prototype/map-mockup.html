@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>战况地图 · 示意原型</title>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e13; --panel:rgba(13,18,26,.96); --border:#1e2632;
+    --text:#e8eef5; --muted:#8b98a9; --accent:#4da3ff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); overflow:hidden}
+  #map{position:absolute; inset:0; background:#0a0e13}
+  .hud{position:absolute; inset:0; pointer-events:none}
+  .hud > *{pointer-events:auto}
+
+  .brand{position:absolute; top:16px; left:16px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px 14px; box-shadow:0 4px 24px rgba(0,0,0,.5)}
+  .brand h1{font-size:15px; font-weight:650; letter-spacing:.2px; display:flex; align-items:center; gap:8px}
+  .brand .live{width:8px; height:8px; border-radius:50%; background:#2ecc71; box-shadow:0 0 0 0 rgba(46,204,113,.6); animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,204,113,.55)}70%{box-shadow:0 0 0 8px rgba(46,204,113,0)}100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}}
+  .brand p{font-size:11px; color:var(--muted); margin-top:3px}
+
+  .panel{position:absolute; top:0; right:0; bottom:0; width:340px; background:var(--panel); border-left:1px solid var(--border); display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,.45)}
+  .panel-head{padding:16px 16px 12px; border-bottom:1px solid var(--border)}
+  .panel-head h2{font-size:15px; font-weight:650; display:flex; align-items:center; gap:8px}
+  .panel-head h2 .live{width:8px;height:8px;border-radius:50%;background:#2ecc71;animation:pulse 1.6s infinite}
+  .chips{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap}
+  .chip{font-size:10.5px; padding:3px 8px; border-radius:20px; border:1px solid var(--border); color:var(--muted); background:rgba(255,255,255,.03)}
+  .stats{display:flex; gap:0; margin-top:12px; border:1px solid var(--border); border-radius:8px; overflow:hidden}
+  .stat{flex:1; text-align:center; padding:8px 4px; background:rgba(255,255,255,.02)}
+  .stat b{display:block; font-size:16px; font-weight:700}
+  .stat span{font-size:10px; color:var(--muted)}
+  .stat + .stat{border-left:1px solid var(--border)}
+  .feed{flex:1; overflow-y:auto; padding:10px 0}
+  .feed::-webkit-scrollbar{width:6px}
+  .feed::-webkit-scrollbar-thumb{background:#2a3442; border-radius:3px}
+  .feed-title{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding:4px 16px 8px}
+  .item{display:flex; align-items:center; gap:8px; padding:7px 16px; border-left:2px solid transparent; font-size:12.5px}
+  .item:hover{background:rgba(255,255,255,.03)}
+  .item .dot{width:8px; height:8px; border-radius:50%; flex:0 0 auto}
+  .item .type{flex:0 0 auto; font-size:10px; padding:2px 7px; border-radius:10px; border:1px solid}
+  .item .place{font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .item .meta{margin-left:auto; font-size:10.5px; color:var(--muted); white-space:nowrap}
+  .decay{padding:12px 16px; border-top:1px solid var(--border); font-size:11px; color:var(--muted)}
+  .decay h3{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px}
+  .decay .row{display:flex; align-items:center; gap:8px; margin:5px 0}
+  .decay .d-dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto}
+  .d-ring{box-shadow:0 0 0 4px rgba(255,176,46,.25)}
+  .panel-foot{padding:10px 16px; border-top:1px solid var(--border); font-size:10.5px; color:var(--muted)}
+
+  .legend{position:absolute; left:16px; bottom:28px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:11px; box-shadow:0 4px 24px rgba(0,0,0,.5)}
+  .legend h3{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:7px}
+  .legend .row{display:flex; align-items:center; gap:8px; margin:5px 0}
+  .legend .d-dot{width:9px; height:9px; border-radius:50%}
+
+  .watermark{position:absolute; top:16px; right:356px; font-size:10.5px; color:var(--muted); background:var(--panel); border:1px solid var(--border); border-radius:20px; padding:4px 12px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="hud">
+  <div class="brand">
+    <h1><span class="live"></span>战况监控 · 示意原型</h1>
+    <p>Telegram 群消息 → 实时地图</p>
+  </div>
+  <div class="watermark">演示数据 · 非真实事件</div>
+  <div class="panel">
+    <div class="panel-head">
+      <h2><span class="live"></span>实时事件流</h2>
+      <div class="chips">
+        <span class="chip">6 群监听中</span>
+        <span class="chip">延迟 ≤2 分钟</span>
+        <span class="chip">SSE 已连接</span>
+      </div>
+      <div class="stats" id="stats">
+        <div class="stat"><b id="s-fresh">0</b><span>活跃 · 15 分</span></div>
+        <div class="stat"><b id="s-recent">0</b><span>近期 · 1 小时</span></div>
+        <div class="stat"><b id="s-today">142</b><span>今日事件</span></div>
+      </div>
+    </div>
+    <div class="feed" id="feed">
+      <div class="feed-title">按时间倒序</div>
+    </div>
+    <div class="decay">
+      <h3>时间衰减 · 显示语义</h3>
+      <div class="row"><span class="d-dot d-ring" style="background:#ffb02e"></span>0–15 分钟:高亮 + 脉冲(直播态)</div>
+      <div class="row"><span class="d-dot" style="background:#ffb02e; opacity:.75"></span>15–60 分钟:常态显示</div>
+      <div class="row"><span class="d-dot" style="background:#ffb02e; opacity:.3"></span>&gt;1 小时:移入历史图层 / 时间轴</div>
+    </div>
+    <div class="panel-foot">📸 截图 Bot:事件触发 · 最小间隔 5 分钟 → Telegram / Discord</div>
+  </div>
+  <div class="legend" id="legend">
+    <h3>事件类型</h3>
+  </div>
+</div>
+
+<script>
+const TYPE_META = {
+  explosion: {color:'#ff6b4a', zh:'爆炸'},
+  shelling:  {color:'#ffb02e', zh:'炮击'},
+  drone:     {color:'#b07dff', zh:'无人机'},
+  missile:   {color:'#ff4d6d', zh:'导弹'}
+};
+
+/* 示意数据(合成,非真实事件) */
+const events = [
+  {place:'Херсон',    lon:32.6169, lat:46.6354, type:'shelling',  minutes:8,  reports:3},
+  {place:'Нікополь',  lon:34.4000, lat:47.5667, type:'shelling',  minutes:12, reports:1},
+  {place:'Харків',    lon:36.2304, lat:49.9935, type:'drone',     minutes:20, reports:2},
+  {place:'Запоріжжя', lon:35.1396, lat:47.8388, type:'explosion', minutes:25, reports:1},
+  {place:'Краматорськ',lon:37.5563, lat:48.7231, type:'missile',  minutes:33, reports:2},
+  {place:'Очаків',    lon:31.5500, lat:46.6167, type:'explosion', minutes:41, reports:1},
+  {place:'Бахмут',    lon:38.0000, lat:48.6000, type:'shelling',  minutes:52, reports:1},
+  {place:'Авдіївка',  lon:37.7500, lat:48.1333, type:'shelling',  minutes:58, reports:2},
+  {place:"Куп'янськ", lon:37.6167, lat:49.7167, type:'missile',   minutes:66, reports:1},
+  {place:'Вугледар',  lon:37.2500, lat:47.7833, type:'drone',     minutes:82, reports:1},
+  {place:'Одеса',     lon:30.7233, lat:46.4825, type:'missile',   minutes:95, reports:1}
+];
+
+const freshOf = m => m <= 15 ? 'fresh' : (m <= 60 ? 'recent' : 'old');
+
+const geo = {
+  type:'FeatureCollection',
+  features: events.map(e => ({
+    type:'Feature',
+    geometry:{type:'Point', coordinates:[e.lon, e.lat]},
+    properties:{
+      place:e.place, minutes:e.minutes, reports:e.reports,
+      fresh:freshOf(e.minutes), color:TYPE_META[e.type].color, zh:TYPE_META[e.type].zh
+    }
+  }))
+};
+
+const map = new maplibregl.Map({
+  container:'map',
+  style:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  center:[31.6, 48.7],
+  zoom:4.9,
+  minZoom:4,
+  maxZoom:9
+});
+
+map.on('load', () => {
+  map.addSource('events', {type:'geojson', data:geo});
+
+  map.addLayer({id:'fresh-glow', type:'circle', source:'events',
+    filter:['==',['get','fresh'],'fresh'],
+    paint:{'circle-radius':22, 'circle-color':['get','color'], 'circle-opacity':0.3,
+           'circle-blur':0.8, 'circle-stroke-color':['get','color'], 'circle-stroke-width':1.4, 'circle-stroke-opacity':0.55}});
+  map.addLayer({id:'fresh-core', type:'circle', source:'events',
+    filter:['==',['get','fresh'],'fresh'],
+    paint:{'circle-radius':8, 'circle-color':['get','color'], 'circle-opacity':0.95}});
+  map.addLayer({id:'recent', type:'circle', source:'events',
+    filter:['==',['get','fresh'],'recent'],
+    paint:{'circle-radius':6.5, 'circle-color':['get','color'], 'circle-opacity':0.72,
+           'circle-stroke-color':'rgba(10,14,19,.9)', 'circle-stroke-width':1}});
+  map.addLayer({id:'old', type:'circle', source:'events',
+    filter:['==',['get','fresh'],'old'],
+    paint:{'circle-radius':4, 'circle-color':['get','color'], 'circle-opacity':0.28}});
+  map.addLayer({id:'labels', type:'symbol', source:'events',
+    layout:{'text-field':['get','place'], 'text-size':11, 'text-offset':[0,1.45],
+            'text-anchor':'top', 'text-allow-overlap':false},
+    paint:{'text-color':'#dbe4ee', 'text-halo-color':'rgba(8,12,16,.92)', 'text-halo-width':1.4,
+           'text-opacity':['match',['get','fresh'],'fresh',0.95,'recent',0.7,0.35]}});
+
+  /* 活跃点脉冲动画(截图导出模式 ?export=1 下禁用,避免阻塞渲染) */
+  const isExport = location.search.includes('export');
+  if (!isExport) {
+    let t = 0;
+    const pulse = () => {
+      t += 0.05;
+      map.setPaintProperty('fresh-core','circle-radius', 8 + Math.sin(t)*2);
+      map.setPaintProperty('fresh-glow','circle-opacity', 0.28 + Math.sin(t)*0.09);
+      map.setPaintProperty('fresh-glow','circle-radius', 22 + Math.sin(t)*4);
+      requestAnimationFrame(pulse);
+    };
+    requestAnimationFrame(pulse);
+  }
+});
+
+/* 右侧事件流 */
+const feed = document.getElementById('feed');
+const list = events.slice().sort((a,b) => a.minutes - b.minutes).slice(0, 9);
+for (const e of list) {
+  const m = TYPE_META[e.type];
+  const div = document.createElement('div');
+  div.className = 'item';
+  const timeTxt = e.minutes < 60 ? e.minutes + ' 分钟前' : Math.floor(e.minutes/60) + ' 小时前';
+  div.innerHTML =
+    '<span class="dot" style="background:' + m.color + (e.minutes <= 15 ? ';box-shadow:0 0 0 3px ' + m.color + '33' : '') + '"></span>' +
+    '<span class="type" style="color:' + m.color + ';border-color:' + m.color + '44;background:' + m.color + '14">' + m.zh + '</span>' +
+    '<span class="place">' + e.place + '</span>' +
+    '<span class="meta">' + timeTxt + ' · ' + e.reports + ' 次报告</span>';
+  feed.appendChild(div);
+}
+
+/* 统计 */
+document.getElementById('s-fresh').textContent  = events.filter(e => e.minutes <= 15).length;
+document.getElementById('s-recent').textContent = events.filter(e => e.minutes <= 60).length;
+
+/* 图例 */
+const legend = document.getElementById('legend');
+for (const [key, m] of Object.entries(TYPE_META)) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = '<span class="d-dot" style="background:' + m.color + '"></span>' + m.zh;
+  legend.appendChild(row);
+}
+</script>
+</body>
+</html>

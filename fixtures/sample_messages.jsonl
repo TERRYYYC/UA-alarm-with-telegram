@@ -1,0 +1,13 @@
+{"source_id":1,"external_id":"msg-001","revision":1,"body_text":"Обстріл Херсона, 10 хвилин тому","published_at":"2026-09-07T12:00:00Z"}
+{"source_id":1,"external_id":"msg-002","revision":1,"body_text":"У Херсоні тихо, обстрілів не було","published_at":"2026-09-07T12:01:00Z"}
+{"source_id":1,"external_id":"msg-003","revision":1,"body_text":"Обстріл Херсона, 12 хвилин тому","published_at":"2026-09-07T12:02:00Z","forward_json":"{\"from_channel\":\"ch-B\"}"}
+{"source_id":1,"external_id":"msg-004","revision":1,"body_text":"Вибухи в Одесі та Миколаєві","published_at":"2026-09-07T12:05:00Z"}
+{"source_id":1,"external_id":"msg-005","revision":1,"body_text":"Приліт у селі Малі Копані","published_at":"2026-09-07T12:06:00Z"}
+{"source_id":1,"external_id":"msg-006","revision":1,"body_text":"Обстріл Іванівки","published_at":"2026-09-07T12:07:00Z"}
+{"source_id":1,"external_id":"msg-007","revision":1,"body_text":"Обстріл Іванівки, Херсонська область","published_at":"2026-09-07T12:08:00Z"}
+{"source_id":1,"external_id":"msg-008","revision":1,"body_text":"Обстріл Бахмута о 14:32","published_at":"2026-09-07T15:00:00Z"}
+{"source_id":1,"external_id":"msg-009","revision":1,"body_text":"Вчора вночі вибухи в Запоріжжі","published_at":"2026-09-07T09:00:00Z"}
+{"source_id":1,"external_id":"msg-010","revision":1,"body_text":"Обстріл Харкова","published_at":"2026-09-07T12:10:00Z"}
+{"source_id":1,"external_id":"msg-010","revision":2,"body_text":"Обстріл Харкова, 20 минут назад","published_at":"2026-09-07T12:11:00Z","edit_json":"{\"edited\":true}"}
+{"source_id":1,"external_id":"msg-010","revision":3,"body_text":"Помилкове повідомлення: обстрілу Харкова не було","published_at":"2026-09-07T12:12:00Z","edit_json":"{\"edited\":true}"}
+{"source_id":1,"external_id":"msg-011","revision":1,"body_text":"Обстрел Харькова","published_at":"2026-09-07T12:15:00Z"}

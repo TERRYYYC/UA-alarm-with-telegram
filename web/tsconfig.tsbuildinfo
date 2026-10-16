@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/api.ts","./src/basemap.ts","./src/main.tsx","./src/types.ts","./src/util.ts","./src/vite-env.d.ts","./src/components/geodata.tsx","./src/components/mapview.tsx","./src/components/sidebar.tsx","./src/components/toolbar.tsx"],"version":"5.9.3"}

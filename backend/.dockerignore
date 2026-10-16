@@ -1,0 +1,16 @@
+# 凭据与本地数据绝不进镜像(镜像内容会被任何能访问构建机的人读到)
+.env
+data/telegram.session
+data/.login-*
+data/app.db
+data/app.db-shm
+data/app.db-wal
+data/boot-test.db
+data/publish
+
+# 本地开发产物
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.pip-cache/

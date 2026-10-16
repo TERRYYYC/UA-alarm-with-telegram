@@ -1,0 +1,1009 @@
+{
+  "name": "TG_Message_processor_from_databse",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8ffbe469-806b-471f-8669-56ebbb9263c5",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "未发现符合条件的",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        -128
+      ],
+      "id": "3d224eef-afea-43bc-a0de-916ce5af45e5",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-oss:120b",
+          "mode": "list",
+          "cachedResultName": "GPT-OSS:120B"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.question }}"
+            },
+            {
+              "content": "={{ $json.combined_prompt }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        -112
+      ],
+      "id": "e7e058a3-e905-4dae-be78-51a876385ed9",
+      "name": "Message a Ollama",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "xxxxxxxxxxxxxxx",
+          "name": "OpenAi account"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "notes": "Ollama账户1"
+    },
+    {
+      "parameters": {
+        "chatId": "-100xxxxxxxxxxxxxx",
+        "text": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        -128
+      ],
+      "id": "3a2a2650-3443-426a-b76d-f77b36f41880",
+      "name": "Send a text message2",
+      "webhookId": "4484ba7a-55c8-4482-9454-9e547bcacdae",
+      "credentials": {
+        "telegramApi": {
+          "id": "xxxxxxxxxxxxxxxxxxxxxxx",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-oss:120b",
+          "mode": "list",
+          "cachedResultName": "GPT-OSS:120B"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.question }}"
+            },
+            {
+              "content": "={{ $json.combined_prompt }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        144
+      ],
+      "id": "931cba0e-092f-4581-9497-0b9ba4b80fa9",
+      "name": "Message a Ollama1",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "xxxxxxxxxxxxxxxxxxx",
+          "name": "NEW API"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "notes": "Ollama账户2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8ffbe469-806b-471f-8669-56ebbb9263c5",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "未发现符合条件的",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        128
+      ],
+      "id": "450bd26f-77be-4f37-a70f-a90461b1734a",
+      "name": "Filter3"
+    },
+    {
+      "parameters": {
+        "chatId": "-100xxxxxxxxxxxxxx",
+        "text": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        128
+      ],
+      "id": "caf44446-dc1a-40ff-8f3a-a06324657fec",
+      "name": "Send a text message3",
+      "webhookId": "96a42e09-c139-4c5f-9d5d-bc777f66bd19",
+      "credentials": {
+        "telegramApi": {
+          "id": "xxxxxxxxxxxxxxxxxxxxxxxx",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 简单直接，直接利用 JS 的数组映射\nreturn $input.all().map(item => {\n  return {\n    json: {\n      ...item.json,\n      upperText: (item.json.text || '').toUpperCase(),\n      processedAt: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -128
+      ],
+      "id": "9722e9e4-c2a7-4892-b7a4-116c05b25a85",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        -624
+      ],
+      "id": "c2c0c3b4-0d72-461d-aa72-351221aa212a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "tg_message",
+        "limit": 100,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "processed",
+              "condition": "eq",
+              "keyValue": "false"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -624
+      ],
+      "id": "110a5baa-5ca9-4e4a-8a0c-87820d8fcdc1",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "xxxxxxxxxxxxxxxxxxxxxxxx",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取 Supabase 节点返回的所有数据\nconst items = $input.all();\n\nif (items.length === 0) {\n  return []; // 如果没有未处理消息，则停止执行\n}\n\n// 提取需要的字段并拼接成一段文本\nlet combinedText = \"【待处理消息列表】\\n\\n\";\nconst processedIds = [];\n\nitems.forEach((item, index) => {\n  const data = item.json;\n  processedIds.push(data.id); // 保存主键 ID，后续更新状态用\n  \n  combinedText += `--- 消息 #${index + 1} ---\\n`;\n  combinedText += `Time: ${data.date}\\n`;\n  combinedText += `Message ID: ${data.message_id}\\n`;\n  combinedText += `链接: ${data.message_url || '无'}\\n`;\n  combinedText += `内容: ${data.text || data.raw_text || '无内容'}\\n\\n`;\n});\n\n// 返回聚合后的数据及 ID 列表\nreturn [{\n  json: {\n    combined_prompt: combinedText,\n    ids_to_update: processedIds,\n    count: items.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -624
+      ],
+      "id": "52dbc056-9d44-4d31-8bdc-d25199f80fb7",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dd2307db-2e06-4d0b-9d08-027c26f61dff",
+              "name": "question",
+              "value": "=={{ `角色设定：\n你是一名专业的信息筛选与翻译助手。你的任务是对输入的原始消息流进行语义理解、合规筛选和精确翻译。你不需要对内容进行任何概括或总结，只需还原事实。用中文回答。\n\n核心格式约束（严格遵守）：\n1. 必须完全使用【普通纯文本（Plain Text）】进行输出。\n2. 绝对禁止使用任何 HTML 标签（如 <b>, <br>, <a> 等）。\n3. 绝对禁止使用任何 Markdown 语法格式（不使用加粗、斜体、代码块等）。\n4. 换行请直接使用标准回车换行。\n5. 来源链接必须直接输出标准的原始 HTTP/HTTPS 网址（如 https://t.me/xxxxxx），末尾不要附加任何多余标点符号。\n\n工作步骤与筛选规则：\n1. 【语义理解与筛选】：逐条阅读输入的消息，仅保留包含以下动态的“有效信息”：\n   - 即将发生、正在发生或最新的无人机活动\n   - 即将发生、正在发生或最新的导弹活动\n   - 军队、武器的最新部署与调动\n   - 导弹发射与导弹威胁\n   - 官方或实时的安全预警/警报\n   - 战况总结或汇报统计\n   【严格剔除】：彻底过滤历史事件回顾、广告推广、无关新闻及闲聊内容。\n2. 【精确翻译】：将筛选出的有效信息准确翻译为通顺、专业的中文，忠实还原原文事实，不做缩减或提炼。\n3. 【元数据提取】：每条信息必须附带对应的发布时间和原始来源链接。\n4. 文本中如需使用小于号或大于号，请直接写成“小于”或“大于”，切勿使用 < 或 > 符号。\n\n输出格式模板（严格按此格式输出，不要添加额外的前言或后记）：\n\n有效动态信息列表：\n\n条目 1\n时间：[原消息中的发布时间是UTC+0时间，你需要调整成UTC+3时间，用“UTC+3时间-小时:分钟:秒”的格式，若原文没有则写“未标明”]\n内容：[准确翻译后的中文有效信息事实]\n来源链接：[对应的原始网址]\n\n条目 2\n时间：[原消息中的发布时间是UTC+0时间，你需要调整成UTC+3时间，用“UTC+3时间-小时:分钟:秒”的格式，若原文没有则写“未标明”]\n内容：[准确翻译后的中文有效信息事实]\n来源链接：[对应的原始网址]\n\n（注：若所有输入消息中均无符合条件的有效信息，请仅输出：未发现符合条件的有效动态信息。）\n\n以下是待处理的消息源文：` }}",
+              "type": "string"
+            },
+            {
+              "id": "72b2c056-8da3-402b-bdb5-3ed2508aa121",
+              "name": "combined_prompt",
+              "value": "={{ $json.combined_prompt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        -624
+      ],
+      "id": "0a4329a4-8ade-4afa-9972-9af069690c92",
+      "name": "Edit Fields RSS信息提取1",
+      "notesInFlow": true,
+      "notes": "拼接Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://xxxxxxxxxxx/api/paas/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"glm-4.7-flash\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ ($json.question + ' ' + $json.combined_prompt).replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        432,
+        -624
+      ],
+      "id": "2fe70d37-c237-4d24-9c2f-3c828c3c2ee1",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput",
+      "notes": "智谱AI调用"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64f54911-c5c8-4a09-ab23-a7da59b53542",
+              "name": "telegram_text",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -640
+      ],
+      "id": "0fc83c68-d7bf-45fd-97d6-fbd0660ef9e2",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8ffbe469-806b-471f-8669-56ebbb9263c5",
+              "leftValue": "={{ $json.telegram_text }}",
+              "rightValue": "未发现符合条件的",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        -640
+      ],
+      "id": "8cee58ab-3440-44f1-94dc-8f7c5da6ad4e",
+      "name": "Filter4"
+    },
+    {
+      "parameters": {
+        "chatId": "-100xxxxxxxxxxxxxx",
+        "text": "={{ $json.telegram_text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        -640
+      ],
+      "id": "943db3b5-1f29-440b-9e34-908b124e60fd",
+      "name": "Send a text message4",
+      "webhookId": "3b00c685-8b44-4393-95f0-d7a2cb692ffa",
+      "credentials": {
+        "telegramApi": {
+          "id": "xxxxxxxxxxxxxxxxxxxxxxx",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://xxxxxxxxxxxxxxxx/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sensenova-6.7-flash-lite\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ ($json.question + ' ' + $json.combined_prompt).replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        432,
+        -368
+      ],
+      "id": "af90ce99-c5c3-4bab-b636-174007715eac",
+      "name": "HTTP Request1",
+      "onError": "continueErrorOutput",
+      "notes": "智谱AI调用"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64f54911-c5c8-4a09-ab23-a7da59b53542",
+              "name": "telegram_text",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -384
+      ],
+      "id": "865dd469-a4b2-4db9-81ad-8ef7be76f400",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8ffbe469-806b-471f-8669-56ebbb9263c5",
+              "leftValue": "={{ $json.telegram_text }}",
+              "rightValue": "未发现符合条件的",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        -384
+      ],
+      "id": "180a091e-ffd2-4837-a3fd-c80c1263f6ee",
+      "name": "Filter5"
+    },
+    {
+      "parameters": {
+        "chatId": "-100xxxxxxxxxxxxxx",
+        "text": "={{ $json.telegram_text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        -384
+      ],
+      "id": "6e4b03b6-d778-4a78-a9f3-2d02a5c5e732",
+      "name": "Send a text message5",
+      "webhookId": "3b00c685-8b44-4393-95f0-d7a2cb692ffa",
+      "credentials": {
+        "telegramApi": {
+          "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 简单直接，直接利用 JS 的数组映射\nreturn $input.all().map(item => {\n  return {\n    json: {\n      ...item.json,\n      upperText: (item.json.text || '').toUpperCase(),\n      processedAt: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        128
+      ],
+      "id": "fc0f3152-0c6c-4913-b913-ae294f7880eb",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            },
+            {
+              "name": "Authorization",
+              "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"processed\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1520,
+        -224
+      ],
+      "id": "dc3c6af4-63c8-4f41-b5ce-af75a9b5f605",
+      "name": "HTTP Request2",
+      "notes": "更新数据库"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "@cf/google/gemma-4-26b-a4b-it",
+          "mode": "list",
+          "cachedResultName": "@CF/GOOGLE/GEMMA-4-26B-A4B-IT"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "={{ $json.question }}"
+            },
+            {
+              "content": "={{ $json.combined_prompt }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        368
+      ],
+      "id": "930346c0-8887-40a2-94c9-48d40add0b44",
+      "name": "Message a model",
+      "notesInFlow": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "name": "NEW API"
+        }
+      },
+      "notes": "NEW API"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8ffbe469-806b-471f-8669-56ebbb9263c5",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "未发现符合条件的",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        368
+      ],
+      "id": "21878bfa-f312-432f-a939-c6f18932a3e0",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 简单直接，直接利用 JS 的数组映射\nreturn $input.all().map(item => {\n  return {\n    json: {\n      ...item.json,\n      upperText: (item.json.text || '').toUpperCase(),\n      processedAt: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        368
+      ],
+      "id": "72e1547c-7d5d-4866-8853-9fee2e0400fd",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "chatId": "-100xxxxxxxxxxxxxxxxxx",
+        "text": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        368
+      ],
+      "id": "87acac3c-9c7c-4a86-97e9-4f3c42937226",
+      "name": "Send a text message",
+      "webhookId": "96a42e09-c139-4c5f-9d5d-bc777f66bd19",
+      "credentials": {
+        "telegramApi": {
+          "id": "xxxxxxxxxxxxxxxxxxxxx",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Message a Ollama": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a Ollama1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a Ollama1": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields RSS信息提取1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields RSS信息提取1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Filter4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter4": {
+      "main": [
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Filter5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter5": {
+      "main": [
+        [
+          {
+            "node": "Send a text message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Kyiv",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "saveDataErrorExecution": "all",
+    "saveExecutionProgress": false
+  },
+  "versionId": "0d3e9351-9f8f-4334-aa04-92ed5c9beca0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aacbfa74103a90bc3e3e7eace9aa2b01a2470910b5eba45760e81a1a0dc47040"
+  },
+  "id": "y0ALdsuVyaHhep8z",
+  "tags": []
+}

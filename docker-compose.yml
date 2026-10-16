@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: smon
+      POSTGRES_PASSWORD: smon
+      POSTGRES_DB: smon
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smon -d smon"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: ./backend
+    # Telegram 采集凭据由 backend/.env 提供(不打包进镜像,靠 deploy.sh --with-credentials 同步)。
+    # required: false 让没有凭据的机器照样能构建启动,此时采集器保持禁用(日志一行 "runner disabled")。
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://smon:smon@db:5432/smon
+      GAZETTEER_SEED: /app/data/gazetteer_seed.json
+      # 固定为容器内绝对路径:backend/.env 里写的是相对路径 "data/telegram.session",显式钉死避免受 CWD 影响
+      TELEGRAM_SESSION_PATH: /app/data/telegram.session
+    volumes:
+      # 地名库 + Telethon session 都放宿主目录:session 需要可写,且容器重建后要保留登录态
+      - ./backend/data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # 默认只绑本机回环:通过 SSH 隧道访问,不对公网暴露。
+      # 需要公网访问时:API_BIND=0.0.0.0 docker compose up -d
+      - "${API_BIND:-127.0.0.1}:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/healthz', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    depends_on:
+      - api
+    ports:
+      # 同 api:默认仅回环,SSH 隧道访问。公网访问时 WEB_BIND=0.0.0.0。
+      - "${WEB_BIND:-127.0.0.1}:5173:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata: {}

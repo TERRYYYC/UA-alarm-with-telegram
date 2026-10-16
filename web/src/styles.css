@@ -1,0 +1,570 @@
+:root {
+  --bg: #080b0e;
+  --panel: #0c1117;
+  --surface: #10161e;
+  --border: #202833;
+  --text: #e5e9ee;
+  --muted: #909ba8;
+  --accent: #4da3ff;
+  --explosion: #c96a50;
+  --shelling: #c89340;
+  --drone: #8b6fbc;
+  --missile: #bd576d;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+.muted {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.export-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 24px;
+  background: rgba(12, 17, 23, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ---- toolbar ---- */
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 44px;
+  padding: 0 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #666;
+}
+.status-dot[data-status='connected'] {
+  background: #2ecc71;
+}
+.status-dot[data-status='reconnecting'],
+.status-dot[data-status='connecting'] {
+  background: #e6a23c;
+}
+.status-dot[data-status='api-error'] {
+  background: #e05a4f;
+}
+.demo-tag {
+  font-size: 10.5px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+.seg {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.seg button {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 4px 10px;
+  font-size: 11.5px;
+}
+.seg button + button {
+  border-left: 1px solid var(--border);
+}
+.seg button.on {
+  background: var(--surface);
+  color: var(--text);
+}
+.types {
+  display: flex;
+  gap: 6px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  padding: 3px 8px;
+  font-size: 11.5px;
+}
+.chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.chip.on {
+  color: var(--text);
+  border-color: var(--c, var(--border));
+  background: color-mix(in srgb, var(--c, transparent) 12%, transparent);
+}
+.pending-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  padding: 4px 10px;
+  font-size: 11.5px;
+}
+.pending-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+/* ---- layout ---- */
+.main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.map {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+}
+.map .maplibregl-ctrl-attrib {
+  background: rgba(12, 17, 23, 0.85);
+  color: var(--muted);
+  font-size: 10px;
+}
+.map .maplibregl-ctrl-attrib a {
+  color: var(--muted);
+}
+
+/* 地图事件标签(DOM 标记,支持中文字体) */
+.map-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
+  font-size: 11px;
+  line-height: 1.2;
+  color: #dbe4ee;
+  text-shadow: 0 1px 2px rgba(8, 11, 14, 0.95), 0 0 3px rgba(8, 11, 14, 0.9);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+.map-label[data-tier='fresh'] {
+  opacity: 1;
+  font-weight: 600;
+}
+.map-label[data-tier='recent'] {
+  opacity: 0.75;
+}
+.map-label[data-tier='old'] {
+  opacity: 0.4;
+}
+
+.side {
+  flex: 0 0 clamp(256px, 16vw, 320px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+}
+.side-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.side-head b {
+  font-size: 13px;
+}
+.back {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 12px;
+  padding: 0;
+}
+.feed {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.feed::-webkit-scrollbar {
+  width: 6px;
+}
+.feed::-webkit-scrollbar-thumb {
+  background: #2a3442;
+  border-radius: 3px;
+}
+
+/* ---- feed items ---- */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  font-size: 12.5px;
+}
+.item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.item.on {
+  background: var(--surface);
+  border-left-color: var(--accent);
+}
+.item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.type-chip {
+  flex: 0 0 auto;
+  font-size: 10px;
+  padding: 1px 6px;
+  border: 1px solid;
+  border-radius: 3px;
+}
+.place {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.meta {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.empty {
+  padding: 24px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ---- detail ---- */
+.detail {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 10px 12px;
+}
+.kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 12px;
+}
+.kv span:first-child {
+  color: var(--muted);
+}
+.tag {
+  font-size: 10.5px;
+  padding: 1px 7px;
+  border-radius: 3px;
+}
+.tag.unverified {
+  color: #e6a23c;
+  border: 1px solid #e6a23c55;
+}
+.tag.auto_confirmed {
+  color: #6fb7e0;
+  border: 1px solid #6fb7e055;
+}
+.tag.confirmed {
+  color: #2ecc71;
+  border: 1px solid #2ecc7155;
+}
+.tag.rejected {
+  color: #e05a4f;
+  border: 1px solid #e05a4f55;
+}
+.sec-title {
+  margin-top: 12px;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+.ev {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 9px;
+}
+.ev p {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.ev-link {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.ev-link:hover {
+  text-decoration: underline;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.actions button {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 6px 0;
+  font-size: 12px;
+}
+.actions button:hover {
+  border-color: var(--muted);
+}
+.actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- pending ---- */
+.pitem {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.pitem-head {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 12.5px;
+}
+.ptext {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  word-break: break-word;
+}
+.pitem-actions {
+  margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+}
+.pitem-actions .dismiss {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 8px;
+}
+.pitem-actions .dismiss:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+.pitem-actions .dismiss:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.resolve {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.resolve input,
+.resolve select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 5px 8px;
+  font-size: 12px;
+  width: 100%;
+}
+.resolve button {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  padding: 6px 0;
+  font-size: 12px;
+}
+.resolve button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- 地名库维护面板 ---- */
+.geo-btn {
+  border-color: #3b4a5e;
+}
+.tabs {
+  flex: 0 0 auto;
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.tabs button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  padding: 7px 0;
+  font-size: 12px;
+}
+.tabs button.on {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.side-head .ghost {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 11px;
+  padding: 3px 8px;
+}
+.side-head .ghost:disabled {
+  opacity: 0.5;
+}
+.geodata-note {
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: var(--muted);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  word-break: break-word;
+}
+.pitem-actions {
+  gap: 6px;
+}
+.geo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.geo-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.geo-form input,
+.geo-form select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 5px 8px;
+  font-size: 12px;
+  width: 100%;
+}
+.geo-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+.geo-row label {
+  flex: 1;
+}
+.geo-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.geo-actions button {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  padding: 6px 0;
+  font-size: 12px;
+}
+.geo-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.resolve button.wide {
+  width: 100%;
+  border-color: var(--border);
+  color: var(--text);
+}
+.pick {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12px;
+  padding: 5px 8px;
+  white-space: nowrap;
+}
+.pick.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.pick-marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: rgba(79, 168, 224, 0.25);
+  box-shadow: 0 0 0 4px rgba(79, 168, 224, 0.15);
+}
